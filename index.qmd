@@ -351,9 +351,9 @@ plot_stations()
 Let's say we want to study rainfall at a particular point. We'll use Rice University in Houston as our example:
 
 ```{julia}
-target_location = "Rice University"  # <1>
-target_lon = -95.404970              # <2>
-target_lat = 29.718952               # <3>
+target_location = "Lubbock, Texas"  # <1>
+target_lon = -101.90430            # <2>
+target_lat = 33.5845               # <3>
 ```
 
 1. Descriptive name for our target location (change this for different places!)
@@ -500,9 +500,9 @@ Now we'll work with a GEV distribution to create return period plots and compare
 ```{julia}
 # GEV parameters for Houston area (units: inches)
 # Try modifying these values to better fit your data!
-μ = 4.0    # Location parameter - shifts the distribution left/right
-σ = 1.3    # Scale parameter - controls spread (must be > 0)
-ξ = 0.15   # Shape parameter - controls tail behavior
+μ = 1.7    # Location parameter - shifts the distribution left/right
+σ = 1.0    # Scale parameter - controls spread (must be > 0)
+ξ = 0.05  # Shape parameter - controls tail behavior
 
 houston_gev = GeneralizedExtremeValue(μ, σ, ξ)  # <1>
 ```
@@ -607,56 +607,88 @@ Explore the rainfall data to find one station where there *appears* to be a posi
 
 **Station with apparent positive trend:**
 
-*Write your answer here. Include the station name/ID and explain what you observe in the data that suggests an increasing trend.*
+Station ID: 684
+
+Station Name: Thorndale 
+
+Thorndale seems to have a weak upward trend, mostly as a result of the most extreme rainfall measurements.  The annual maximum baseline remains the same, but the high values seem to keep getting higher. 
+
+
+```{julia}
+positive_stationid = 684 #Set station id
+positive_station = stations[stations.stnid .== positive_stationid, :] #get station row
+print(positive_station)
+
+positive_rainfall = @chain rainfall_data begin
+	@filter(stnid == !!positive_stationid)  # <1>
+end
+plot_time_series(positive_station, positive_rainfall)
+```
 
 
 
 **Station with apparent negative trend:**
 
-*Write your answer here. Include the station name/ID and explain what you observe in the data that suggests a decreasing trend.*
 
+Station ID: 504
+
+Station Name: Morse
+
+Morse seems to have a negative rainfall trend, due in part to a spike in the 1950's.  Still, even disregarding that, there does seem to be a decrease in annual rainfall extremes from the early 1960's until the early 80's, after which things seem to even out. 
+
+```{julia}
+positive_stationid = 504 #Set station id
+positive_station = stations[stations.stnid .== positive_stationid, :] #get station row
+print(positive_station)
+
+positive_rainfall = @chain rainfall_data begin
+	@filter(stnid == !!positive_stationid)  # <1>
+end
+plot_time_series(positive_station, positive_rainfall)
+```
 
 
 ### GEV Parameter Experimentation
 
 **Starting Parameters vs Final Parameters:**
 
-*Record your starting parameters and the final parameters you chose after experimentation:*
 
 - Starting: $\mu = 4.0$, $\sigma = 1.3$, $\xi = 0.15$
-- Final: $\mu = \ldots$ $\sigma = \ldots$, $\xi = \ldots$
+- Final: $\mu = 1.7$ $\sigma = 1.0$, $\xi = 0.05$
 
 **Parameter Effects:**
 
 **What happened when you increased/decreased $\mu$ (location parameter)?**
 
-*Test values like $\mu = 2.0, 4.0, 6.0$. Describe how the entire GEV curve shifted and how this affected the fit to your red data points.*
 
+
+Increasing this parameter moves our blue line upwards on the graph, decreasing it moves it down.  
 
 
 **What happened when you increased/decreased $\sigma$ (scale parameter)?**
 
-*Test values like $\sigma = 0.8, 1.3, 2.0$. Describe how the curve became steeper/flatter and how this affected the spread of return levels.*
+
+Decreasing this parameter flattens out our curve, increasing it makes it curvy again.  
 
 
 
 **What happened when you changed $\xi$ (shape parameter)?** 
 
-*Test $\xi = -0.1$ (light tail), $\xi = 0.0$ (Gumbel), $\xi = 0.15$, $\xi = 0.3$ (heavy tail). Focus on how the high return period end (right side) of the curve changed.*
 
-
+Increasing this parameter when it's already above 0 makes the upward curve more extreme.  Setting it to 0 gives a straight line towards the end of the curve.  Decreasing it below 0 gives a line that increases at a slower rate as we move along it. 
 
 **Final Assessment:**
 
 **How well does your best-fit GEV distribution represent the closest station's data?**
 
-*Do the red dots follow your blue curve? Where are the biggest deviations?*
+
+It follows the station decently well!  Although it has its biggest deviations at the top and bottom portions of the curve. 
 
 
 
 **Additional observations:**
 
-*Optional: Add any other interesting patterns you notice in the return period analysis.*
+The most noticeable trends in rainfall increasing and decreasing seem to be taking place in the most extreme years. 
 
 
 
